@@ -3,7 +3,7 @@
 
 #include <QObject>
 #include <QThread>
-#include <QTcpSocket>
+#include <QLocalSocket>
 
 #include <QDataStream>
 #include <QString>
@@ -13,10 +13,10 @@ class ClientThread : public QThread
 {
     Q_OBJECT
 public:
-    explicit ClientThread(int SocketDescriptor,QTcpSocket *socket,QObject *parent = 0);
+    explicit ClientThread(int SocketDescriptor,QLocalSocket *socket,QObject *parent = 0);
     QString getUsername() const{return username;}
     int getSocketDescriptor() const{return socketDescriptor;}
-    QTcpSocket* getTcpSocket() const{return tcpSocket;}
+    QLocalSocket* getLocalSocket() const{return localSocket;}
     void setUsername(QString uname) {username = uname;}
     void close();
     friend bool operator==(ClientThread client1,ClientThread client2);
@@ -24,7 +24,7 @@ public:
     void run() override;
 
 signals:
-    void error(QTcpSocket::SocketError socketError);
+    void error(QLocalSocket::LocalSocketError socketError);
     void connected(ClientThread* clientThread);
     void clientDisconnected(ClientThread* clientThread);
     void usernameChanged(QString uname);
@@ -41,7 +41,7 @@ public slots:
 private:
     int socketDescriptor;
     QString username = "Annonymous";
-    QTcpSocket *tcpSocket;
+    QLocalSocket *localSocket;
     quint32 blockSize = 0;
 };
 

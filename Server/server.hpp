@@ -1,7 +1,7 @@
 #ifndef SERVER_HPP
 #define SERVER_HPP
 
-#include <QTcpServer>
+#include <QLocalSocket>
 #include <QObject>
 #include <QLinkedList>
 #include <QHash>
@@ -9,7 +9,7 @@
 #include "clientthread.hpp"
 
 
-class Server : public QTcpServer
+class Server : public QLocalSocket
 {
     Q_OBJECT
 public:
@@ -39,7 +39,7 @@ public slots:
     void on_client_privateFileSend(QString uname,QString receiverName, QString filename, QByteArray dataOfFile);
 
 protected:
-    void incomingConnection(qintptr socketDescriptor) override;
+    void incomingConnection(qintptr socketDescriptor);
 private:
     quint16 port = 7777; //default port
     void deleteClientFromList(ClientThread* client);

@@ -1,21 +1,17 @@
 #include "server.hpp"
 
 Server::Server(QObject *parent):
-    QTcpServer(parent)
+    QLocalSocket(parent)
 {
 
 }
 
 //! PUBLIC
 bool Server::StartServer(){
-    if(!this->listen(QHostAddress::Any,port)){
-        qDebug() << "Could not start server";
-        return false;
-    }
-    else{
-        qDebug() << "Listening...";
-        return true;
-    }
+    this->connectToServer("hello");
+    qDebug() << "Listening...";
+    return true;
+
 }
 
 void Server::setPort(quint16 port){
@@ -29,7 +25,7 @@ void Server::close(){
         client->close();
     }
     //close itself
-    QTcpServer::close();
+    QLocalSocket::close();
 }
 
 void Server::sendTextToAll(QString text,ClientThread* except){
@@ -49,7 +45,7 @@ void Server::sendTextToAll(QString text,ClientThread* except){
             continue;
         x = 0;
         while(x < block.size()){
-            qint64 y = eachClient->getTcpSocket()->write(block);
+            qint64 y = eachClient->getLocalSocket()->write(block);
             x+=y;
             qDebug() << eachClient->getUsername()<< "/sent" << x ;
         }
@@ -71,7 +67,7 @@ void Server::sendTextToOne(QString text,ClientThread* target){
 
     qint64 x = 0;
     while(x < block.size()){
-        qint64 y = target->getTcpSocket()->write(block);
+        qint64 y = target->getLocalSocket()->write(block);
         x+=y;
         qDebug() << target->getUsername()<< " /sent " << x ;
         qDebug() << "-----";
@@ -96,7 +92,7 @@ void Server::sendDataFileToAll(QString text,QByteArray dataOfFile,ClientThread* 
             continue;
         x = 0;
         while(x < block.size()){
-            qint64 y = eachClient->getTcpSocket()->write(block);
+            qint64 y = eachClient->getLocalSocket()->write(block);
             x+=y;
             qDebug() << eachClient->getUsername()<< "/sent file: " << x ;
         }
@@ -118,7 +114,7 @@ void Server::sendDataFileToOne(QString text,QByteArray dataOfFile,ClientThread* 
 
     qint64 x = 0;
     while(x < block.size()){
-        qint64 y = target->getTcpSocket()->write(block);
+        qint64 y = target->getLocalSocket()->write(block);
         x+=y;
         qDebug() << target->getUsername()<< "/sent file: " << x ;
     }
@@ -267,7 +263,7 @@ void Server::on_client_privateFileSend(QString uname,QString receiverName, QStri
 //! PROTECTED
 void Server::incomingConnection(qintptr socketDescriptor){
     qDebug() << socketDescriptor << " Connecting...";
-    QTcpSocket *socket = new QTcpSocket();
+    QLocalSocket *socket = new QLocalSocket();
     ClientThread *cliThread = new ClientThread(socketDescriptor,socket,this);
 
 
